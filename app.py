@@ -6,18 +6,18 @@ def main():
     st.sidebar.header("Input User Sidebar")
 
     # Sidebar Inputs
-    feature_1 = st.sidebar.slider("Feature 1", min_value=0, max_value=100, value=50)
+    feature_1 = st.sidebar.number_input("Feature 1", min_value=0, max_value=100, value=50)
     feature_2 = st.sidebar.selectbox("Feature 2", ["Option 1", "Option 2"])
     feature_3 = st.sidebar.selectbox("Feature 3", ["Option A", "Option B"])
-    feature_4 = st.sidebar.slider("Feature 4", min_value=0, max_value=200, value=100)
-    feature_5 = st.sidebar.slider("Feature 5", min_value=0, max_value=300, value=150)
+    feature_4 = st.sidebar.number_input("Feature 4", min_value=0, max_value=100, value=50)
+    feature_5 = st.sidebar.selectbox("Feature 5", min_value=0, max_value=300, value=150)
     feature_6 = st.sidebar.selectbox("Feature 6", ["Yes", "No"])
     feature_7 = st.sidebar.selectbox("Feature 7", ["Category 1", "Category 2", "Category 3"])
-    feature_8 = st.sidebar.slider("Feature 8", min_value=0, max_value=150, value=75)
+    feature_8 = st.sidebar.number_input("Feature 8", min_value=0, max_value=100, value=50)
     feature_9 = st.sidebar.selectbox("Feature 9", ["True", "False"])
 
     # Main Section
-    st.title("Heart Disease Prediction")
+    st.title("Tittle")
 
     # Tab Layout
     tab1, tab2 = st.tabs(["Single Prediction", "Multi Prediction"])
