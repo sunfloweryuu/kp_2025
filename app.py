@@ -1,55 +1,79 @@
 import streamlit as st
+import pandas as pd
+import numpy as np
+import joblib
 
-def main():
-    st.set_page_config(page_title="=============================", layout="wide")
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
 
-    st.sidebar.header("Input User Sidebar")
+# === Dummy data and model setup ===
+# Kamu bisa ganti ini dengan model & data asli
 
-    # Sidebar Inputs
-    feature_1 = st.sidebar.number_input("Feature 1", min_value=0, max_value=100, value=50)
-    feature_2 = st.sidebar.selectbox("Feature 2", ["Option 1", "Option 2"])
-    feature_3 = st.sidebar.selectbox("Feature 3", ["Option A", "Option B"])
-    feature_4 = st.sidebar.number_input("Feature 4", min_value=0, max_value=100, value=50)
-    feature_5 = st.sidebar.slider("Feature 5", min_value=0, max_value=300, value=150)
-    feature_6 = st.sidebar.selectbox("Feature 6", ["Yes", "No"])
-    feature_7 = st.sidebar.selectbox("Feature 7", ["Category 1", "Category 2", "Category 3"])
-    feature_8 = st.sidebar.slider("Feature 8", min_value=0, max_value=150, value=75)
-    feature_9 = st.sidebar.selectbox("Feature 9", ["True", "False"])
+# Sample training to simulate the model
+df = pd.DataFrame({
+    "Program Studi": ["Magister Kedokteran", "Magister Manajemen", "Magister Keperawatan", "Magister Farmasi"] * 25,
+    "Jalur Masuk": np.random.choice(["Mandiri", "Beasiswa", "Kerja Sama"], 100),
+    "IPK S1": np.round(np.random.uniform(2.75, 4.0, 100), 2),
+    "Status Beasiswa": np.random.choice(["Ya", "Tidak"], 100),
+    "Lama Studi (semester)": np.random.randint(3, 7, 100),
+    "Tahun Masuk": np.random.choice([2020, 2021, 2022, 2023, 2024], 100),
+    "Jumlah SKS": np.random.randint(30, 50, 100)
+})
 
-    # Main Section
-    st.title("Tittle")
+# SPP calculation
+spp = 5000000 + \
+      (df["Program Studi"] == "Magister Kedokteran") * 3000000 + \
+      (df["Jalur Masuk"] == "Mandiri") * 2000000 - \
+      (df["IPK S1"] * 500000) - \
+      (df["Status Beasiswa"] == "Ya") * 3000000 + \
+      (df["Lama Studi (semester)"] * 200000) + \
+      (df["Jumlah SKS"] * 10000)
 
-    # Tab Layout
-    tab1, tab2 = st.tabs(["Single Prediction", "Multi Prediction"])
+df["SPP (Rp)"] = spp
 
-    with tab1:
-        st.subheader("User Input")
-        user_input = {
-            "Feature 1": feature_1,
-            "Feature 2": feature_2,
-            "Feature 3": feature_3,
-            "Feature 4": feature_4,
-            "Feature 5": feature_5,
-            "Feature 6": feature_6,
-            "Feature 7": feature_7,
-            "Feature 8": feature_8,
-            "Feature 9": feature_9,
-        }
+# Model training
+X = df.drop(columns=["SPP (Rp)"])
+y = df["SPP (Rp)"]
 
-        st.table([user_input])
+categorical_features = ["Program Studi", "Jalur Masuk", "Status Beasiswa"]
+preprocessor = ColumnTransformer(transformers=[
+    ("cat", OneHotEncoder(drop="first"), categorical_features)
+], remainder="passthrough")
 
-        if st.button("Predict"):
-            st.success("Prediction Complete")
-            st.subheader("Prediction Result")
-            # Example Result
-            st.markdown(
-                "### Prediction: Level X\n" +
-                "This is a placeholder for the prediction result.\n" +
-                "Please customize the result description based on the model output."
-            )
+model = Pipeline(steps=[
+    ("preprocessor", preprocessor),
+    ("regressor", RandomForestRegressor(random_state=42))
+])
+model.fit(X, y)
 
-    with tab2:
-        st.write("Multi Prediction functionality will be added here.")
+# === STREAMLIT UI ===
+st.title("🎓 Prediksi SPP Mahasiswa Pascasarjana")
 
-if __name__ == "__main__":
-    main()
+st.markdown("Masukkan data mahasiswa untuk memprediksi jumlah SPP:")
+
+program_studi = st.selectbox("Program Studi", df["Program Studi"].unique())
+jalur_masuk = st.selectbox("Jalur Masuk", df["Jalur Masuk"].unique())
+ipk = st.slider("IPK S1", 2.75, 4.00, 3.5)
+beasiswa = st.radio("Status Beasiswa", ["Ya", "Tidak"])
+lama_studi = st.slider("Lama Studi (semester)", 3, 6, 4)
+tahun_masuk = st.selectbox("Tahun Masuk", sorted(df["Tahun Masuk"].unique()))
+jumlah_sks = st.slider("Jumlah SKS", 30, 50, 40)
+
+# Prediksi
+input_data = pd.DataFrame([{
+    "Program Studi": program_studi,
+    "Jalur Masuk": jalur_masuk,
+    "IPK S1": ipk,
+    "Status Beasiswa": beasiswa,
+    "Lama Studi (semester)": lama_studi,
+    "Tahun Masuk": tahun_masuk,
+    "Jumlah SKS": jumlah_sks
+}])
+
+predicted_spp = model.predict(input_data)[0]
+
+st.subheader("💰 Prediksi SPP:")
+st.success(f"Rp {int(predicted_spp):,}")
+
