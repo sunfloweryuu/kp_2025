@@ -10,10 +10,10 @@ def main():
     feature_2 = st.sidebar.selectbox("Feature 2", ["Option 1", "Option 2"])
     feature_3 = st.sidebar.selectbox("Feature 3", ["Option A", "Option B"])
     feature_4 = st.sidebar.number_input("Feature 4", min_value=0, max_value=100, value=50)
-    feature_5 = st.sidebar.selectbox("Feature 5", min_value=0, max_value=300, value=150)
+    feature_5 = st.sidebar.slider("Feature 5", min_value=0, max_value=300, value=150)
     feature_6 = st.sidebar.selectbox("Feature 6", ["Yes", "No"])
     feature_7 = st.sidebar.selectbox("Feature 7", ["Category 1", "Category 2", "Category 3"])
-    feature_8 = st.sidebar.number_input("Feature 8", min_value=0, max_value=100, value=50)
+    feature_8 = st.sidebar.slider("Feature 8", min_value=0, max_value=150, value=75)
     feature_9 = st.sidebar.selectbox("Feature 9", ["True", "False"])
 
     # Main Section
